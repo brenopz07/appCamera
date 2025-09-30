@@ -10,8 +10,10 @@ import {
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Gesture, GestureHandlerRootView, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {useAnimatedStyle, useSharedValue} from "react-native-reanimated"
+import * as MediaLibrary from "expo-media-library";
 
 import StickerPicker from './stickerPicker';
+import { useState, useRef } from 'react';
 import Sticker from './Sticker';
 
 const {width, height} = Dimensions.get("screen");
@@ -20,6 +22,7 @@ function clamp(val,min,max){
 }
 
 export default function ModalEditImage({ image, visible, onClose, imageMirror }) {
+    const imageRef = useRef();
     const [modalSticker, setModalSticker] = useState(false);
     const [selectedSticker, setSelectedSticker] = useState();
     const startScale = useSharedValue(0);
@@ -65,6 +68,19 @@ export default function ModalEditImage({ image, visible, onClose, imageMirror })
         ],
     }));
 
+    async function saveImage(){
+        try{
+            const data = await captureRef(imageRef, {quality: 1});
+
+            await MediaLibrary.saveToLibraryAsync(data);
+            if(data){
+                alert("Imagem salva com sucesso!");
+            }
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
   return (
     <Modal style={styles.container} visible={visible} animationType='slide'>
       {/* IMAGEM */}
@@ -72,7 +88,7 @@ export default function ModalEditImage({ image, visible, onClose, imageMirror })
           <GestureDetector gesture={gestures}>
               <SafeAreaView style={styles.container}>
                 {/* ÁREA DELIMITADA DA IMAGEM */}
-                <View style={styles.imageArea}>
+                <View style={styles.imageArea} ref={imageRef}>
                     {selectedSticker && <Sticker stickerSource={selectedSticker}/>}
                   {/* IMAGEM */}
                   <Animated.Image 
@@ -103,12 +119,15 @@ export default function ModalEditImage({ image, visible, onClose, imageMirror })
                 </TouchableOpacity>
 
                 {/* BOTÃO DELETAR STICKERS */}
-                <TouchableOpacity style={styles.buttonModal}>
+                <TouchableOpacity 
+                    style={styles.buttonModal} 
+                    onPress={()=> setSelectedSticker(null)}
+                >
                     <MaterialIcons size={32} name="delete" color={"white"}/>
                 </TouchableOpacity>
 
                 {/* BOTÃO DE SALVAR FOTO */}
-                <TouchableOpacity style={styles.buttonModal}>
+                <TouchableOpacity style={styles.buttonModal} onPress={saveImage}>
                     <MaterialIcons size={32} name="download" color={"white"}/>
                 </TouchableOpacity>
             </View>

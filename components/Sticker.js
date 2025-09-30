@@ -1,6 +1,7 @@
 import { Gesture, GestureHandlerRootView, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {useAnimatedStyle, useSharedValue} from "react-native-reanimated"
 import { Image, Dimensions } from "react-native";
+import { useRef } from 'react';
 
 const {width, height} = Dimensions.get("screen");
 function clamp(val,min,max){
@@ -18,7 +19,7 @@ export default function Sticker({ StickerSource }){
         })
         .onUpdate((event) => {
             scale.value = clamp(
-                startScale.value * event.scale, 0.3, Math.min(width/100, height/100)
+                startScale.value * event.scale, 0.3, Math.min(width/35, height/35)
             );
         }).
         runOnJS(true);
